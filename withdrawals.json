@@ -33,5 +33,18 @@
         "type": "send_money",
         "to": "1212",
         "date": "2026-01-18 13:46:17"
+    },
+    {
+        "account": "11",
+        "amount": 12.0,
+        "type": "withdraw",
+        "date": "2026-01-18 15:13:45"
+    },
+    {
+        "account": "11",
+        "amount": 13.0,
+        "type": "send_money",
+        "to": "1231",
+        "date": "2026-01-18 20:17:26"
     }
 ]
