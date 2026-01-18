@@ -116,6 +116,7 @@ def register_account():
     db.add(account)
     print(f"Account created successfully for {name}!")
 
+
 def login():
     name = input("write your name: ")
     account = db.find_by_name(name)
@@ -133,6 +134,7 @@ def login():
     print(f"Welcome back, {account['name']}!")
     return account
 
+
 def deposit(account):
     amount = FloatPrompt.ask("Enter amount to deposit")
 
@@ -145,6 +147,7 @@ def deposit(account):
 
     console.print(f"[green]✔ Deposited {amount}[/green]")
     console.print(f"[bold cyan]New balance:[/bold cyan] {account['balance']}")
+
 
 def withdraw(account):
     amount = FloatPrompt.ask("Enter amount to withdraw")
@@ -195,6 +198,7 @@ def send_money():
             "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
 
+
 def other():
     console.print(Panel(
         "[bold yellow]Additional Services[/bold yellow]\n"
@@ -220,7 +224,7 @@ def other():
     if choice == "4":
         return
 
-    # Fake loading animation (looks professional)
+    # Fake loading animation for unavailable features
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -238,31 +242,70 @@ def other():
         )
     )
 
+
 def balance(account):
     print(f"Your current balance is: {account.get('balance', 0)}")
 
-transaction_types = {0: "withdraw", 1: "send_money", 2: "deposit", 3: "other"}
+
+transaction_types = {
+    0: "withdraw", 
+    1: "send_money", 
+    2: "deposit", 
+    3: "other"
+    }
+
 
 def transaction_history():
+    table = Table(
+        title="Transaction History",
+        header_style="bold yellow"
+    )
 
-    table = Table(title="Withdrawal History", header_style="bold yellow")
     table.add_column("#", justify="center")
+    table.add_column("Transaction Type", justify="center")
     table.add_column("Amount", justify="right")
+    table.add_column("From / To", justify="center")
     table.add_column("Date")
- 
-    all_transaction = wh.read()
-    transaction = [w for w in all_transaction if w.get('account') == account['name']]
 
-    if not transaction:
-         console.print("[red]No withdrawals found[/red]")
-         return
+    all_transactions = wh.read()
+    username = account['name']
 
-    else:
-        for i, trans in enumerate(transaction[-10:], 1):
-            trans_type = trans.get('type', 'unknown')
-            table.add_row(f"{i}. {trans_type} ${trans.get('amount', 0)} on {trans.get('date', 'N/A')}")
+    transactions = [
+        t for t in all_transactions
+        if t.get('account') == username or t.get('to') == username
+    ]
+
+    if not transactions:
+        console.print("[red]No transactions found[/red]")
+        return
+
+    for i, trans in enumerate(transactions[-10:], 1):
+        type_id = trans.get('type', 3)  # default = other
+        type_name = transaction_types.get(type_id, "unknown")
+
+        amount = trans.get('amount', 0)
+        date = trans.get('date', 'N/A')
+
+        if trans.get('account') == username:
+            # sent 
+            direction = f"→ {trans.get('to', '{account}')}"
+            flow = "SEND"
+        else:
+            # rec 
+            direction = f"← {trans.get('account', '{sender}')}"
+            flow = "RECEIVE"
+
+        table.add_row(
+            str(i),
+            f"{type_name} ({flow})",
+            f"${amount}",
+            direction,
+            date
+        )
 
     console.print(table)
+
+
 
 def account_info(account):
     info = (
