@@ -1,3 +1,4 @@
+from typing import Any
 from rich.console import Console
 from rich.table import Table
 
@@ -17,7 +18,8 @@ def admin_menu():
         table.add_row("2", "View All Transactions")
         table.add_row("3", "Manage Accounts")
         table.add_row("4", "View Total Bank Balance")
-        table.add_row("5", "Logout")
+        table.add_row("5", "Search Accounts")
+        table.add_row("6", "Logout")
 
         console.print(table)
 
@@ -42,6 +44,10 @@ def admin_menu():
             transaction_table.add_column("Type", style="green")
             transaction_table.add_column("Amount", style="yellow")
             transaction_table.add_column("Date", style="white")
+
+            tx_type = input("Enter type (deposit/withdraw): ").lower()
+            filtered: list[Any] = [t for t in wh.read() if t.get("type") == tx_type]
+
 
             for trans in transactions:
                 transaction_table.add_row(
@@ -70,5 +76,14 @@ def admin_menu():
             console.print(f"[bold yellow]Total Bank Balance:[/bold yellow] ${total_balance}")
 
         elif choice == "5":
+            name = input("Enter account name to search: ").lower()
+            accounts = db.read()
+            results = [acc for acc in accounts if name in acc["name"].lower()]
+            if not results:
+                console.print(f"[red]Account '{name}' not found.[/red]")
+            else:
+                console.print(f"[green]Account Found:[/green] Name: {results[0]['name']}, Balance: {results[0].get('balance', 0)}, Created At: {results[0].get('created_at', 'Unknown')}")
+
+        elif choice == "6":
             console.print("Logging out...")
             break
