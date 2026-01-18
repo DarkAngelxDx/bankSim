@@ -90,6 +90,19 @@ def user_menu(account_name):
 
     console.print(table)
 
+def admin_menu():
+    table = Table(title="Admin Menu", header_style="bold red")
+    table.add_column("Option", justify="center", style="cyan")
+    table.add_column("Action", style="green")
+
+    table.add_row("1", "View All Accounts")
+    table.add_row("2", "View All Transactions")
+    table.add_row("3", "Manage Accounts")
+    table.add_row("4", "View Total Bank Balance")
+    table.add_row("5", "Logout")
+
+    console.print(table)
+
 
 def create_account(name, password, date):
     return {"name": name, "password": password, "balance": 0.0, "created_at": date["created_at"]}
@@ -323,6 +336,29 @@ while True:
     welcome_screen()
     main_menu()
     choice = Prompt.ask("Choose option", choices=["1", "2", "3"])
+
+    if choice == "admin":
+        print(input("Enter admin password: "))
+        if input("Enter admin password: ") != "admin123":
+            console.print("[red]Incorrect admin password[/red]")
+            continue
+        admin_logged_in = True
+        while admin_logged_in:
+            admin_menu()
+            admin_choice = Prompt.ask(
+                "Choose option",
+                choices=["1", "2", "3", "4", "5"]
+            )
+
+            if admin_choice == '1':
+                console.print("[bold yellow]Viewing all accounts...[/bold yellow]")
+                accounts = db.read()
+                for acc in accounts:
+                    console.print(f"- {acc['name']} (Balance: {acc['balance']})")
+
+            elif admin_choice == '2':
+                console.print("[bold yellow]Viewing all transactions...[/bold yellow]")
+                transactions = wh.read()
 
 
     if choice == '1':
